@@ -147,6 +147,17 @@ test("emergency target and sinking fund per payday", () => {
   assert.deepEqual(C.sinkingPerPayday({ yearly: 1000, dueMonth: 11 }, 0, "2026-11-26"), { paydays: 1, per: 1000 });
 });
 
+test("yearly cost: 12 months, both paydays, end month, paused", () => {
+  const r = (over = {}) => ({ amount: 500, payday: "15", endMonth: "", active: true, ...over });
+  assert.equal(C.yearlyCost(r(), "2030-01"), 6000);
+  assert.equal(C.yearlyCost(r({ payday: "both" }), "2030-01"), 12000);
+  assert.equal(C.yearlyCost(r({ endMonth: "2030-03" }), "2030-01"), 1500);
+  assert.equal(C.yearlyCost(r({ endMonth: "2031-06" }), "2030-11"), 4000);
+  assert.equal(C.yearlyCost(r({ endMonth: "2032-06" }), "2030-11"), 6000);
+  assert.equal(C.yearlyCost(r({ endMonth: "2029-12" }), "2030-01"), 0);
+  assert.equal(C.yearlyCost(r({ active: false }), "2030-01"), 0);
+});
+
 test("debt payoff: interest, rollover, method order, never", () => {
   const one = C.payoffPlan([{ id: "a", name: "A", balance: 1000, rate: 12, monthly: 500 }]);
   assert.deepEqual([one.months, one.interest], [3, 15.25]);

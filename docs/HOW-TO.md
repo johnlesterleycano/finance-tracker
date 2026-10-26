@@ -348,6 +348,8 @@ Two charts for the 12 months up to the month on screen:
 
 All your recurring bills, grouped by **15th payday**, **30th payday** and **Both paydays**. Select **+ Bill** to add one, or select a bill to edit or delete it (fields are explained in [Step 2](#step-2-bills-you-pay-every-month)).
 
+Each bill shows what it costs **a year** (the next 12 months, or until its end month), and the card shows the total. A small amount every payday can be a big number over a year: a good place to look for something to cancel.
+
 New payday plans copy these. Changing one here **doesn't change plans you've already made**. To change a plan you've already made, edit the bill on the Payday screen.
 
 ### Income sources

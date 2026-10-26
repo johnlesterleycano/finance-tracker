@@ -1,5 +1,5 @@
-import { esc, peso, peso0, pct, mLabel, MONTHS } from "../format.js";
-import { chain } from "../calc.js";
+import { esc, peso, peso0, pct, mLabel, MONTHS, todayISO } from "../format.js";
+import { chain, yearlyCost } from "../calc.js";
 import { S, sync } from "../store.js";
 import { ui } from "../app.js";
 import { ic, catColor, HOW_TO } from "./common.js";
@@ -10,8 +10,10 @@ const sortKey = r => r.payday + String(r.order || 0).padStart(4, "0");
 
 export function viewTrends() {
   const rec = Object.values(S.recurring).sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
+  const from = todayISO().slice(0, 7), yearly = rec.reduce((t, r) => t + yearlyCost(r, from), 0);
   const rl = day => rec.filter(r => r.payday === day).map(r => {
-    const meta = [r.category, r.dueDay ? "due day " + r.dueDay : "", r.endMonth ? "ends " + mLabel(r.endMonth) : "", r.active === false ? "paused" : ""].filter(Boolean).join(" · ");
+    // yearly cost right after the category: phones cut the end of this line
+    const meta = [r.category, r.active === false ? "paused" : peso0(yearlyCost(r, from)) + " a year", r.dueDay ? "due day " + r.dueDay : "", r.endMonth ? "ends " + mLabel(r.endMonth) : ""].filter(Boolean).join(" · ");
     return `<div class="row ${r.active === false ? "paused" : ""}" data-flip-id="rec-${esc(r._id)}"><button class="row-main" data-act="edit-rec" data-id="${esc(r._id)}"><span class="row-name">${esc(r.name)}</span><span class="row-meta"><span class="dot" style="background:${catColor(r.category)}"></span> ${esc(meta)}</span></button><span class="row-amt money">${peso(r.amount)}</span></div>`;
   }).join("") || '<p class="muted" style="margin:6px 0">None yet.</p>';
   const st = S.settings, theme = window.paydayTheme?.get() || "system";
@@ -23,7 +25,7 @@ export function viewTrends() {
   return `<div class="st">
   <div class="st-main">
    <section class="card sec anim"><div class="card-head"><h2>Last 12 months</h2><span class="muted small">to ${esc(mLabel(ui.month))}</span></div>${chartTrend(S, ui.month, chain(S))}</section>
-   <section class="card sec anim"><div class="card-head"><h2>Recurring bills</h2><button class="btn ghost small" data-act="add-rec">${ic.plus} Bill</button></div>
+   <section class="card sec anim"><div class="card-head"><h2>Recurring bills</h2>${yearly ? `<span class="muted small">${peso0(yearly)} a year</span>` : ""}<button class="btn ghost small" data-act="add-rec">${ic.plus} Bill</button></div>
      <div class="eyebrow" style="margin-top:4px">15th payday</div><div class="list">${rl("15")}</div>
      <div class="eyebrow" style="margin-top:14px">30th payday</div><div class="list">${rl("30")}</div>
      <div class="eyebrow" style="margin-top:14px">Both paydays</div><div class="list">${rl("both")}</div>

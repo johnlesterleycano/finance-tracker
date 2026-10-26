@@ -109,6 +109,12 @@ export function loanStats(l, D, today) {
 export function monthlyEssentials(D) {
   return sum(Object.values(D.recurring).filter(r => r.active !== false && r.category !== "Other"), r => r.amount * (r.payday === "both" ? 2 : 1));
 }
+// Cost over the next 12 months from `from` (YYYY-MM): stops at endMonth; a bill on both paydays counts twice; paused bills cost 0.
+export function yearlyCost(r, from) {
+  if (r.active === false) return 0;
+  const months = !r.endMonth ? 12 : Math.min(12, Math.max(0, (r.endMonth.slice(0, 4) - from.slice(0, 4)) * 12 + (r.endMonth.slice(5, 7) - from.slice(5, 7)) + 1));
+  return round2((+r.amount || 0) * months * (r.payday === "both" ? 2 : 1));
+}
 export const emergencyTarget = (f, D) => round2((+f.months || 3) * monthlyEssentials(D));
 export const fundTarget = (f, D) => f.kind === "emergency" ? emergencyTarget(f, D) : f.kind === "sinking" ? +f.yearly || 0 : +f.target || 0;
 
