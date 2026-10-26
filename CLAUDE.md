@@ -7,6 +7,10 @@ A twice-a-month (15th / 30th payday) budget web app. Static site on GitHub Pages
 - Never modify `spreadsheet/` (the original source spreadsheet; gitignored).
 - Work autonomously and note decisions in this file or the README.
 
+## Design
+- Desktop-first: used mainly in a computer or laptop browser, the phone is secondary. From 900px wide: sidebar navigation (keyboard: ← → month, 1–4 sections), one-row header, multi-column views (Payday goes three columns from 1200px), centered dialogs, bill actions on hover/focus. Below 900px: bottom tab bar, bottom sheets, swipeable bill rows.
+- Pink design system: rose/blush tokens on `:root` in `app/css/app.css`; green/amber/red only for Comfortable/Watch/Tight. White text sits on `--accent`, never `--pink` (contrast).
+
 ## Layout
 - `app/js/calc.js`: all money rules, pure, tested in `tests/calc.test.js`. Change rules here, not in views.
 - `app/js/store.js`: state `S`, local and sheet modes, localStorage cache, outbox (key `col/id` → edit counter), `put()` / `putSettings()`.

@@ -25,7 +25,7 @@ function render(kind = "update", dir = 1) {
   $("#monthTitle").textContent = mLabel(ui.month);
   $("#halfSeg").hidden = ui.tab !== "payday";
   document.querySelectorAll("#halfSeg button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.half === ui.half)));
-  document.querySelectorAll("#tabbar button").forEach(b => { if (b.dataset.tab === ui.tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  document.querySelectorAll("[data-tab]").forEach(b => { if (b.dataset.tab === ui.tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
   const v = $("#view"), y = window.scrollY;
   v.innerHTML = VIEWS[ui.tab]();
   window.scrollTo(0, kind === "update" ? y : 0);
@@ -54,7 +54,7 @@ function showConnect(message = "") {
   $("#monthTitle").textContent = "Your money plan";
   $("#view").innerHTML = `<section class="card connect anim" aria-labelledby="connectTitle">
     <span class="eyebrow">Get started</span><h2 id="connectTitle">Where should your plan live?</h2>
-    <p class="muted">Connect the Google Sheet you set up to sync between phones, or keep everything in this browser.</p>
+    <p class="muted">Connect the Google Sheet you set up to use the same plan on your computer and phone, or keep everything in this browser.</p>
     <form id="connectForm" class="form" novalidate>
       <input type="text" name="username" autocomplete="username" value="Payday Money Plan" hidden>
       ${fld("Google Sheet web app link", "url", "", "url", 'placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false" required')}
@@ -86,16 +86,15 @@ function showConnect(message = "") {
 }
 
 function setSync() {
-  const el = $("#sync"), w = sync.waiting;
+  const w = sync.waiting;
   const [cls, label] = S.mode === "local" ? ["local", "Saved on this device"]
     : sync.state === "syncing" ? ["busy", "Syncing…"]
     : sync.state === "saving" ? ["busy", "Saving" + (w ? " · " + w : "") + "…"]
     : sync.state === "offline" ? ["warn", "Offline" + (w ? " · " + w + " waiting" : "")]
-    : sync.state === "signed-out" ? ["bad", "Signed out · tap to connect"]
+    : sync.state === "signed-out" ? ["bad", "Signed out · select to reconnect"]
     : ["", "Synced to your Sheet"];
-  el.className = "sync " + cls;
-  el.querySelector("span").textContent = label;
-  el.title = sync.message || label;
+  // one status in the sidebar (computers) and one in the header (phones)
+  document.querySelectorAll(".sync").forEach(el => { el.className = "sync " + cls; el.querySelector("span").textContent = label; el.title = sync.message || label; });
 }
 
 let toastT;
@@ -126,7 +125,7 @@ document.addEventListener("click", e => {
     render("slide", dir);
     return;
   }
-  if (e.target.closest("#sync")) { if (sync.state === "signed-out") app.connect(); else if (S.mode === "sheet") A["sync-now"](); return; }
+  if (e.target.closest(".sync")) { if (sync.state === "signed-out") app.connect(); else if (S.mode === "sheet") A["sync-now"](); return; }
   const a = e.target.closest("[data-act]");
   if (a && A[a.dataset.act] && !a.disabled) { e.preventDefault(); app.lastTap = a; A[a.dataset.act](a); }
 });
@@ -134,6 +133,16 @@ document.addEventListener("change", e => { const a = e.target.closest("[data-act
 // keyboard focus on a swiped-open row's main content slides the row closed again
 document.addEventListener("focusin", e => { const row = e.target.closest(".swipe > .row"); if (row && e.target.matches(":focus-visible")) row.parentElement.scrollTo({ left: 0 }); });
 window.addEventListener("resize", () => placePills(false));
+
+// keyboard shortcuts for computers: arrows change month, 1-4 switch section (never while typing or in a sheet)
+document.addEventListener("keydown", e => {
+  if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || document.querySelector("dialog[open]")) return;
+  if (e.target.closest?.("input, select, textarea, [contenteditable]")) return;
+  if (S.mode === "none" || ui.connecting || !ui.month) return;
+  // arrows still scroll a focused chart or bill row sideways
+  if ((e.key === "ArrowLeft" || e.key === "ArrowRight") && !e.target.closest?.(".scroll-x, .swipe")) { e.preventDefault(); A[e.key === "ArrowLeft" ? "month-prev" : "month-next"](); }
+  else if (/^[1-4]$/.test(e.key)) { const b = document.querySelector(`.side-nav [data-tab="${TABS[+e.key - 1]}"]`); if (b) b.click(); }
+});
 
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js").catch(() => {});
 

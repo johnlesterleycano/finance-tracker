@@ -5,6 +5,8 @@ import { G, draggableSheet } from "./motion.js";
 import { app } from "./app.js";
 
 let dlg = null, opener = null;
+// computers get a centered dialog; phones get a bottom sheet (same breakpoint as the sidebar in app.css)
+const wide = () => matchMedia("(min-width: 900px)").matches;
 const closeIcon = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
 // remember how to find the button that opened the sheet, since views re-render and replace it
@@ -46,15 +48,15 @@ export function openSheet(title, body, onSave, opts = {}) {
   }));
   if (opts.del) {
     const del = d.querySelector("[data-del]"); let armed = false;
-    del.addEventListener("click", () => { if (!armed) { armed = true; del.textContent = "Tap again to delete"; return; } opts.del(); closeSheet(); });
+    del.addEventListener("click", () => { if (!armed) { armed = true; del.textContent = "Select again to delete"; return; } opts.del(); closeSheet(); });
   }
   d.showModal();
   if (opts.onReady) opts.onReady(form);
   const first = form.querySelector("input:not([type=hidden]),select,textarea");
   if (first && !opts.noFocus) first.focus({ preventScroll: true });
-  draggableSheet(d, d.querySelector(".grab"), () => closeSheet());
+  if (!wide()) draggableSheet(d, d.querySelector(".grab"), () => closeSheet());
   const g = G();
-  if (g) g.from(d, { yPercent: 100, duration: 0.35, ease: "power3.out" });
+  if (g) g.from(d, wide() ? { y: 14, scale: 0.98, opacity: 0, duration: 0.22, ease: "power2.out" } : { yPercent: 100, duration: 0.35, ease: "power3.out" });
 }
 
 function finish() {
@@ -69,7 +71,7 @@ function closeNow() { if (dlg) { const d = dlg; dlg = null; if (d.open) d.close(
 export function closeSheet() {
   if (!dlg) return;
   const d = dlg, g = G();
-  if (g) g.to(d, { yPercent: 100, duration: 0.25, ease: "power2.in", onComplete: () => { if (dlg === d) finish(); } });
+  if (g) g.to(d, { ...(wide() ? { y: 10, opacity: 0, duration: 0.16 } : { yPercent: 100, duration: 0.25 }), ease: "power2.in", onComplete: () => { if (dlg === d) finish(); } });
   else finish();
 }
 

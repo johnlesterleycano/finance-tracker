@@ -55,13 +55,14 @@ export function chartTrend(D, month, ch) {
   s += `</svg></div>` + legend([["Income", "var(--c7)"], ["Bills", "var(--c1)"]]);
   const H2 = 150, y2 = v => T + (H2 - T - B) * (1 - Math.min(v, 1.2) / 1.2);
   const pts = data.map((x, i) => x.has && x.inc ? [L + gw * i + gw / 2, y2(x.bills / x.inc), x] : null).filter(Boolean);
-  let s2 = `<div class="scroll-x" style="margin-top:14px"><svg class="chart" viewBox="0 0 ${W} ${H2}" role="img" aria-label="Bills as a share of income by month">`;
+  let s2 = `<div class="scroll-x"><svg class="chart" viewBox="0 0 ${W} ${H2}" role="img" aria-label="Bills as a share of income by month">`;
   s2 += `<rect x="${L}" y="${y2(st.tight)}" width="${W - L - R}" height="${y2(0) - y2(st.tight)}" fill="var(--warn-bg)" opacity=".55"/><rect x="${L}" y="${y2(st.comfortable)}" width="${W - L - R}" height="${y2(0) - y2(st.comfortable)}" fill="var(--good-bg)" opacity=".8"/>`;
   [0, .5, 1].forEach(t => { s2 += `<text x="${L - 6}" y="${y2(t) + 4}" text-anchor="end">${pct(t)}</text>`; });
   if (pts.length > 1) s2 += `<polyline class="line" points="${pts.map(p => p[0] + "," + p[1]).join(" ")}" fill="none" stroke="var(--pink)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
   pts.forEach((p, i) => { const last = i === pts.length - 1; s2 += `<circle cx="${p[0]}" cy="${p[1]}" r="${last ? 5 : 3.5}" fill="${last ? "var(--pink)" : "var(--surface)"}" stroke="var(--pink)" stroke-width="2"><title>${mLabel(p[2].m)}: ${pct(p[2].bills / p[2].inc)}</title></circle>`; });
   data.forEach((x, i) => { s2 += `<text x="${L + gw * i + gw / 2}" y="${H2 - 10}" text-anchor="middle">${mShort(x.m)}</text>`; });
-  return s + s2 + `</svg></div><p class="note">Green band: Comfortable (up to ${pct(st.comfortable)} of income). Amber: Watch (up to ${pct(st.tight)}). Above that is Tight.</p>`;
+  // two panels: side by side on wide screens, stacked on phones
+  return `<div class="trend-grid"><div><h3 class="chart-title">Income and bills</h3>${s}</div><div><h3 class="chart-title">Bills as a share of income</h3>${s2}</svg></div><p class="note">Green band: Comfortable (up to ${pct(st.comfortable)} of income). Amber: Watch (up to ${pct(st.tight)}). Above that is Tight.</p></div></div>`;
 }
 
 // One bar per debt from now to the month it is paid off.

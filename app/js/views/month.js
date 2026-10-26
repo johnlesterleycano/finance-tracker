@@ -31,9 +31,8 @@ export function viewMonth() {
   segs.push({ k: "Savings plan", v: d.save, c: "var(--c6)" });
   if (d.env > 0) segs.push({ k: "Spending money", v: d.env, c: "var(--c2)" });
   const unalloc = Math.max(0, d.inc - d.bills - d.save - d.env); if (unalloc > 0) segs.push({ k: "Unallocated", v: unalloc, c: "var(--c7)" });
-  return `<div class="grid two">
-   <div class="grid">
-    <section class="card anim">
+  return `<div class="mo">
+    <section class="card anim mo-a">
       <div class="card-head"><h2>Month at a glance</h2><span class="chip ${uc}">${ul}</span></div>
       <div class="scroll-x"><table class="glance">
         <thead><tr><th scope="col">₱</th><th scope="col">15th</th><th scope="col">30th</th><th scope="col">Month</th></tr></thead>
@@ -50,7 +49,7 @@ export function viewMonth() {
         </tbody></table></div>
       ${!d.a || !d.b ? `<button class="add" data-act="create-month">${ic.plus} Create the missing payday</button>` : ""}
     </section>
-    <section class="card anim">
+    <section class="card anim mo-b">
       <div class="card-head"><h2>Quick check</h2></div>
       <div class="checks">
         ${qc("15th bills load", ratio(d.A.bills, d.A.inc))}
@@ -61,12 +60,11 @@ export function viewMonth() {
       </div>
       <p class="note">Comfortable up to ${pct(st.comfortable)} of income, Tight above ${pct(st.tight)}. Change these in Trends › Rules.</p>
     </section>
-    ${balanceCard()}
-   </div>
-   <div class="grid">
+    <div class="mo-c">${balanceCard()}</div>
+  </div>
+  <div class="grid three">
     <section class="card anim"><div class="card-head"><h2>Income vs bills vs savings</h2></div>${chartHalves(d)}</section>
     <section class="card anim"><div class="card-head"><h2>Where the month's income goes</h2></div>${chartDonut(segs, d.inc)}</section>
     <section class="card anim"><div class="card-head"><h2>Bills: paid vs still to pay</h2></div>${chartPaid(d)}</section>
-   </div>
   </div>`;
 }

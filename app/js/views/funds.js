@@ -15,7 +15,7 @@ export const payoffInputs = today => Object.values(S.loans).map(l => {
 function fundCard(f, today) {
   const bal = fundBalance(f, S), t = fundTarget(f, S), w = t ? Math.min(100, Math.round(bal / t * 100)) : 0;
   const regular = [f.a15 ? peso0(f.a15) + " on 15th" : "", f.a30 ? peso0(f.a30) + " on 30th" : ""].filter(Boolean).join(" · ") || "No regular amount";
-  let sub = t ? `<div class="progress"><i data-w="${w}"></i></div><span class="row-meta">${w}% of ${peso0(t)}${f.kind === "emergency" ? " · " + (+f.months || 3) + " months of essentials" : " target"}</span>` : `<span class="row-meta">No target set · tap to add one</span>`;
+  let sub = t ? `<div class="progress"><i data-w="${w}"></i></div><span class="row-meta">${w}% of ${peso0(t)}${f.kind === "emergency" ? " · " + (+f.months || 3) + " months of essentials" : " target"}</span>` : `<span class="row-meta">No target set yet</span>`;
   if (f.kind === "sinking") { const s = sinkingPerPayday(f, bal, today); sub += `<span class="row-meta">${bal >= t ? "Fully funded for " : peso0(s.per) + " a payday covers it by "}${esc(MONTHS[(+f.dueMonth || 12) - 1])}</span>`; }
   const kind = f.kind === "emergency" ? '<span class="chip soft">Emergency</span>' : f.kind === "sinking" ? '<span class="chip soft">Yearly cost</span>' : "";
   return `<button class="card fund anim" data-act="edit-fund" data-id="${esc(f._id)}"><div class="fund-top"><b>${esc(f.name)}</b>${kind}</div><div class="fund-bal money" data-count="${bal}" data-key="fund-${esc(f._id)}">${peso0(bal)}</div>${sub}<span class="row-meta">${esc(regular)}</span></button>`;
@@ -45,10 +45,13 @@ export function viewFunds() {
     return `<button class="card fund anim loan" data-act="edit-loan" data-id="${esc(l._id)}">${ring(f)}<span class="loan-body"><b>${esc(l.name)}</b><span class="row-meta">${peso0(l.monthly)} a month · ${st.paid}${term ? " of " + term : ""} paid${l.rate ? " · " + esc(String(l.rate)) + "% a year" : ""}</span><span class="row-meta">${st.left == null ? (l.balance ? "Open-ended · see the payoff plan below" : "Add the number of months to see what's left") : st.left === 0 ? "Fully paid" : st.left + " months left · about " + peso0(st.remaining) + " to go · ends " + esc(st.ends)}</span>${l.balance ? `<span class="row-meta">Balance ${peso0(l.balance)}</span>` : ""}</span></button>`;
   }).join("");
   return `<div class="hero anim" style="margin-bottom:4px"><span class="eyebrow">All savings funds</span><div class="hero-big money" data-count="${total}" data-key="funds-total">${peso0(total)}</div><div class="hero-sub">Opening balance plus every transfer marked as moved, minus withdrawals${S.settings.trackFrom ? " since " + esc(fmtDate(S.settings.trackFrom)) + " " + esc(S.settings.trackFrom.slice(0, 4)) : ""}.</div></div>
+  <div class="fu"><div class="fu-a">
   ${!hasEmergency && ess ? `<div class="card anim tip"><b>Start an emergency fund?</b><span class="muted">Three months of your essential bills is ${peso0(ess * 3)}. It covers a job loss or a hospital bill without new debt.</span><button class="btn ghost small" data-act="add-fund" data-kind="emergency">${ic.plus} Emergency fund</button></div>` : ""}
   <div class="section-title"><h2>Savings funds</h2><button class="btn ghost small" data-act="add-fund">${ic.plus} Fund</button></div>
   <div class="cards">${funds.map(f => fundCard(f, today)).join("") || '<div class="card muted">No funds yet.</div>'}</div>
+  </div><div class="fu-b">
   <div class="section-title"><h2>Loans & installments</h2><button class="btn ghost small" data-act="add-loan">${ic.plus} Loan</button></div>
   <div class="cards">${lc || '<div class="card muted anim">Add a loan to count down the months left. Each paid bill with the same name counts as one installment.</div>'}</div>
-  <div style="margin-top:14px">${payoffCard(today)}</div>`;
+  <div style="margin-top:14px">${payoffCard(today)}</div>
+  </div></div>`;
 }

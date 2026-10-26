@@ -14,7 +14,7 @@ const finishedLoans = () => Object.values(S.loans).filter(l => loanStats(l, S, t
 const reached = () => new Set(Object.values(S.funds).filter(f => { const t = fundTarget(f, S); return t > 0 && fundBalance(f, S) >= t; }).map(f => f._id));
 const inView = sel => document.querySelector("#view " + sel);
 const flipId = id => `[data-flip-id="${CSS.escape(id)}"]`;
-// tap once to arm, again to confirm
+// select once to arm, again to confirm
 const armed = (el, label, go) => { if (el.dataset.armed) { go(); return; } el.dataset.armed = "1"; el.textContent = label; };
 
 function createPeriod(m, h) {
@@ -44,7 +44,7 @@ export const A = {
   "create-first": () => { const id = currentPeriodId(todayISO()); ui.month = id.slice(0, 7); ui.half = id.endsWith("15") ? 1 : 2; createPeriod(ui.month, ui.half); app.toast("Your first plan is ready"); app.render("enter"); },
   "create-period": () => { createPeriod(ui.month, ui.half); app.toast("Plan created from your recurring bills"); app.render("enter"); },
   "create-month": () => { [1, 2].forEach(h => { if (!S.periods[pid(ui.month, h)]) createPeriod(ui.month, h); }); app.toast(mLabel(ui.month) + " created"); app.render("enter"); },
-  "delete-period": el => armed(el, "Tap again to delete this plan", () => { put("periods", pid(ui.month, ui.half), null); app.toast("Payday plan deleted"); app.render("enter"); }),
+  "delete-period": el => armed(el, "Select again to delete this plan", () => { put("periods", pid(ui.month, ui.half), null); app.toast("Payday plan deleted"); app.render("enter"); }),
   "toggle-bill": el => toggleBill(el.dataset.id),
   "bill-partial": el => billSheet(curPeriod().bills.find(x => x.id === el.dataset.id), "partial"),
   "toggle-save": el => {
@@ -84,8 +84,8 @@ export const A = {
   "sync-now": () => { refresh(); app.toast("Syncing with your Sheet"); },
   export: () => exportBackup(),
   restore: async el => { const f = el.files?.[0]; if (!f) return; try { await restoreBackup(f); app.toast("Backup restored"); app.boot(); } catch (e) { app.toast(e.message || "That file couldn't be read."); } el.value = ""; },
-  "sign-out-all": el => armed(el, "Tap again: sign out every device", async () => { try { await signOutAll(); } catch { app.toast("Couldn't reach the Sheet. Try again when you're online."); } }),
-  "forget-device": el => armed(el, S.mode === "sheet" ? "Tap again: remove data from this device" : "Tap again: erase everything here", () => forgetDevice()),
+  "sign-out-all": el => armed(el, "Select again: sign out every device", async () => { try { await signOutAll(); } catch { app.toast("Couldn't reach the Sheet. Try again when you're online."); } }),
+  "forget-device": el => armed(el, S.mode === "sheet" ? "Select again: remove data from this device" : "Select again: erase everything here", () => forgetDevice()),
   "go-connect": () => app.connect()
 };
 
