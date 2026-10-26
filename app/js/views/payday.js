@@ -2,7 +2,7 @@ import { esc, peso, peso0, pct, mLabel, mAdd, pid, fmtDate, todayISO } from "../
 import { chain, loadLabel, unLabel, dueStatus, bankCheck, currentPeriodId } from "../calc.js";
 import { S } from "../store.js";
 import { ui } from "../app.js";
-import { ic, catColor, empty } from "./common.js";
+import { ic, catColor, empty, howTo } from "./common.js";
 
 const halfLabel = h => (h == 1 ? "15th" : "30th");
 const periodLabel = id => mLabel(id.slice(0, 7)) + " · " + (id.endsWith("15") ? "15th" : "30th");
@@ -11,7 +11,7 @@ function getStarted() {
   const st = S.settings, incOK = st.incomes.some(i => i.a15 || i.a30), recN = Object.keys(S.recurring).length, fundN = Object.keys(S.funds).length;
   const step = (n, done, title, body) => `<li class="step ${done ? "done" : ""}"><span class="step-n" aria-hidden="true">${done ? ic.check : n}</span><div class="step-body"><b>${title}</b>${done ? '<span class="sr-only"> (done)</span>' : ""}${body}</div></li>`;
   const cur = currentPeriodId(todayISO());
-  return `<div class="grid start-grid"><section class="hero anim"><span class="eyebrow">Welcome</span><div class="hero-big" style="font-size:32px">Let's set up your money plan</div><div class="hero-sub">Four quick steps. You can change everything later in Trends › Setup.</div></section>
+  return `<div class="grid start-grid"><section class="hero anim"><span class="eyebrow">Welcome</span><div class="hero-big" style="font-size:32px">Let's set up your money plan</div><div class="hero-sub">Four quick steps. You can change everything later in Trends › Setup. First time? Read ${howTo("the how-to guide")}.</div></section>
   <section class="card anim"><ol class="steps">
     ${step(1, incOK, "Your income on each payday", `<div class="list">${st.incomes.map((x, i) => `<div class="row"><button class="row-main" data-act="edit-src" data-i="${i}"><span class="row-name">${esc(x.name || "Income")}</span><span class="row-meta">${peso0(x.a15)} on 15th · ${peso0(x.a30)} on 30th</span></button></div>`).join("")}</div><button class="add" data-act="add-src">${ic.plus} Add income source</button>`)}
     ${step(2, recN > 0, "Bills you pay every month", `<p class="muted">${recN ? recN + " recurring bill" + (recN > 1 ? "s" : "") + " added." : "Cards, loans, rent, utilities, allowances. Pick which payday pays each one."}</p><button class="add" data-act="add-rec">${ic.plus} Add a recurring bill</button>`)}
@@ -33,13 +33,18 @@ function dueSoon(today) {
 }
 const nextId = id => id.endsWith("15") ? id.slice(0, 7) + "-30" : mAdd(id.slice(0, 7), 1) + "-15";
 
+// Phones show category, due and paid date in the meta line; computers show them as their own columns (col-when, col-cat).
 function billRow(b, today) {
-  const st = b.status, due = dueStatus(b, today);
-  const meta = [b.category, st === "paid" && b.paidDate ? "paid " + fmtDate(b.paidDate) : "", st === "partial" ? peso0(b.paidAmount) + " paid" : "", b.notes].filter(Boolean).join(" · ");
+  const st = b.status, due = dueStatus(b, today), paidOn = st === "paid" && b.paidDate ? fmtDate(b.paidDate) : "";
+  const dot = `<span class="dot" style="background:${catColor(b.category)}"></span>`, dueChip = due ? `<span class="chip tiny ${due.cls}">${esc(due.label)}</span>` : "";
+  const phone = [b.category, paidOn ? "paid " + paidOn : ""].filter(Boolean).join(" · ");
+  const extra = [st === "partial" ? peso0(b.paidAmount) + " paid" : "", b.notes].filter(Boolean).join(" · ");
   return `<div class="swipe" data-flip-id="${esc(b.id)}">
     <div class="row ${st === "paid" ? "done" : ""}">
       <button class="check ${st === "paid" ? "on" : st === "partial" ? "part" : ""}" data-act="toggle-bill" data-id="${esc(b.id)}" aria-label="Mark ${esc(b.name)} ${st === "paid" ? "unpaid" : "paid"}">${ic.check}</button>
-      <button class="row-main" data-act="edit-bill" data-id="${esc(b.id)}"><span class="row-name">${esc(b.name)}</span><span class="row-meta"><span class="dot" style="background:${catColor(b.category)}"></span> ${due ? `<span class="chip tiny ${due.cls}">${esc(due.label)}</span> ` : ""}${esc(meta)}</span></button>
+      <button class="row-main" data-act="edit-bill" data-id="${esc(b.id)}"><span class="row-name">${esc(b.name)}</span><span class="row-meta"><span class="ph-only">${dot} ${dueChip ? dueChip + " " : ""}${esc(phone)}${phone && extra ? " · " : ""}</span>${esc(extra)}</span></button>
+      <span class="col-when">${dueChip || (paidOn ? "Paid " + esc(paidOn) : "")}</span>
+      <span class="col-cat">${b.category ? dot + esc(b.category) : ""}</span>
       <span class="row-amt money">${peso(b.amount)}</span>
     </div>
     <div class="swipe-actions" role="group" aria-label="More for ${esc(b.name)}">
@@ -63,22 +68,32 @@ export function viewPayday() {
   const exp = sp.expenses.slice().sort((a, b) => (b.date || "").localeCompare(a.date || "")).map(e => `<div class="row"><button class="row-main" data-act="edit-expense" data-id="${esc(e.id)}"><span class="row-name">${esc(e.note || "Expense")}</span><span class="row-meta">${esc(fmtDate(e.date))}</span></button><span class="row-amt money">${peso(e.amount)}</span></div>`).join("");
   const bank = bankCheck(S, id);
   const gapChip = !bank || bank.first ? "" : Math.abs(bank.gap) < 1 ? `<span class="chip good">Matches the plan</span>` : bank.gap < 0 ? `<span class="chip warn">${peso0(-bank.gap)} not in the plan</span>` : `<span class="chip soft">${peso0(bank.gap)} more than planned</span>`;
-  return `${dueSoon(today)}
+  const total = v => `<b class="sec-total money">${peso0(v)}</b>`;
+  return `<div class="st">
+  <div class="st-rail">
     <section class="hero hero-band anim" aria-label="Payday summary">
-      <div class="hero-main"><div class="hero-top"><span class="eyebrow">${label} · ${esc(fmtDate(p.payDate))}</span><span class="chip ${uc}">${ul}</span></div>
+      <div class="hero-top"><span class="eyebrow">${label} · ${esc(fmtDate(p.payDate))}</span><span class="chip ${uc}">${ul}</span></div>
       <div class="hero-big money" data-count="${c.un}" data-key="pd-un">${peso0(c.un)}</div>
-      <div class="hero-sub">left to assign after bills, savings and spending${c.cin ? ` · includes ${peso0(c.cin)} carried in` : ""}</div></div>
+      <div class="hero-sub">left to assign<span class="ph-only"> after bills, savings and spending${c.cin ? ` · includes ${peso0(c.cin)} carried in` : ""}</span></div>
       <div class="hero-stats">
         <div><b class="money" data-count="${c.inc}" data-key="pd-inc">${peso0(c.inc)}</b><span>Income</span></div>
-        <div><b class="money" data-count="${c.bills}" data-key="pd-bills">${peso0(c.bills)}</b><span>Bills · ${pct(c.inc ? c.bills / c.inc : 0)}</span></div>
-        <div><b class="money" data-count="${c.save}" data-key="pd-save">${peso0(c.save)}</b><span>Savings</span></div>
-        <div><b class="money" data-count="${c.env}" data-key="pd-spend">${peso0(c.env)}</b><span>Spending money</span></div>
+        ${c.cin ? `<div class="eq-only"><b class="money">${peso0(c.cin)}</b><span data-op="+">Carried in</span></div>` : ""}
+        <div><b class="money" data-count="${c.bills}" data-key="pd-bills">${peso0(c.bills)}</b><span data-op="−">Bills · ${pct(c.inc ? c.bills / c.inc : 0)}</span></div>
+        <div><b class="money" data-count="${c.save}" data-key="pd-save">${peso0(c.save)}</b><span data-op="−">Savings</span></div>
+        <div><b class="money" data-count="${c.env}" data-key="pd-spend">${peso0(c.env)}</b><span data-op="−">Spending money</span></div>
+        <div class="eq-only eq-total"><b class="money">${peso0(c.un)}</b><span data-op="=">Left to assign</span></div>
       </div>
     </section>
-  <div class="pd">
-   <div class="grid pd-a">
-    <section class="card anim" id="billsCard">
-      <div class="card-head"><h2>Bills</h2><span class="chip ${lc}">${ll} load</span></div>
+    ${dueSoon(today)}
+  </div>
+  <div class="st-main">
+    <section class="card sec anim">
+      <div class="card-head"><h2>Income</h2><button class="btn ghost small" data-act="edit-paydate">Pay date: ${esc(fmtDate(p.payDate))}</button>${total(c.inc)}</div>
+      <div class="list">${incs}</div>
+      <button class="add" data-act="add-income">${ic.plus} Add income</button>
+    </section>
+    <section class="card sec anim" id="billsCard">
+      <div class="card-head"><h2>Bills</h2><span class="chip ${lc}">${ll} load</span>${total(c.bills)}</div>
       <div class="paid-line"><span class="muted">${peso0(c.paid)} paid of ${peso0(c.bills)}</span><b>${pct(paidPct)}</b></div>
       <div class="progress"><i data-w="${Math.round(paidPct * 100)}"></i></div>
       <div class="list" style="margin-top:8px">${unpaid.map(b => billRow(b, today)).join("") || (p.bills.length ? '<p class="muted all-paid">Every bill is paid.</p>' : '<p class="muted" style="margin:12px 0 0">No bills yet.</p>')}</div>
@@ -87,29 +102,20 @@ export function viewPayday() {
       <p class="note swipe-hint">Swipe a bill left for more options.</p>
       <div class="totals"><span>Total bills</span><b class="money">${peso(c.bills)}</b><span>Still to pay</span><b class="money">${peso(c.toPay)}</b></div>
     </section>
-   </div>
-   <div class="grid pd-b">
-    <section class="card anim">
-      <div class="card-head"><h2>Spending money</h2><button class="btn ghost small" data-act="edit-envelope">Budget ${peso0(sp.budget)}</button></div>
+    <section class="card sec anim" id="savingsCard">
+      <div class="card-head"><h2>Savings plan</h2><span class="muted small">${peso0(c.left)} left after bills</span>${total(c.save)}</div>
+      <div class="list">${sav || '<p class="muted" style="margin:0">Nothing set aside yet.</p>'}</div>
+      <button class="add" data-act="add-save">${ic.plus} Add to a fund</button>
+      <div class="totals"><span>Total allocated</span><b class="money">${peso(c.save)}</b>${c.env ? `<span>Spending money</span><b class="money">${peso(c.env)}</b>` : ""}${c.cin ? `<span>Carried in</span><b class="money">${peso(c.cin)}</b>` : ""}<span>Unallocated cash</span><b class="money ${c.un < 0 ? "neg" : ""}">${peso(c.un)}</b></div>
+    </section>
+    <section class="card sec anim" id="spendCard">
+      <div class="card-head"><h2>Spending money</h2><button class="btn ghost small" data-act="edit-envelope">Budget ${peso0(sp.budget)}</button>${total(c.env)}</div>
       ${sp.budget || sp.expenses.length ? `<div class="env-top"><span class="fund-bal money ${envLeft < 0 ? "neg" : ""}" data-count="${envLeft}" data-key="pd-env">${peso0(envLeft)}</span><span class="muted">${envLeft < 0 ? "over budget" : "left until next payday"}</span></div>
       <div class="progress ${envLeft < 0 ? "over" : ""}"><i data-w="${Math.round(envPct * 100)}"></i></div>
       <div class="list" style="margin-top:8px">${exp || '<p class="muted" style="margin:10px 0 0">Nothing spent yet.</p>'}</div>` : `<p class="muted" style="margin:0">Set a budget for groceries, gas and eating out until the next payday, then log what you spend.</p>`}
       <button class="add" data-act="add-expense">${ic.plus} Add expense</button>
     </section>
-    <section class="card anim">
-      <div class="card-head"><h2>Savings plan</h2><span class="muted small">${peso0(c.left)} left after bills</span></div>
-      <div class="list">${sav || '<p class="muted" style="margin:0">Nothing set aside yet.</p>'}</div>
-      <button class="add" data-act="add-save">${ic.plus} Add to a fund</button>
-      <div class="totals"><span>Total allocated</span><b class="money">${peso(c.save)}</b>${c.env ? `<span>Spending money</span><b class="money">${peso(c.env)}</b>` : ""}${c.cin ? `<span>Carried in</span><b class="money">${peso(c.cin)}</b>` : ""}<span>Unallocated cash</span><b class="money ${c.un < 0 ? "neg" : ""}">${peso(c.un)}</b></div>
-    </section>
-   </div>
-   <div class="grid pd-c">
-    <section class="card anim">
-      <div class="card-head"><h2>Income</h2><button class="btn ghost small" data-act="edit-paydate">Pay date: ${esc(fmtDate(p.payDate))}</button></div>
-      <div class="list">${incs}</div>
-      <button class="add" data-act="add-income">${ic.plus} Add income</button>
-    </section>
-    <section class="card anim">
+    <section class="card sec anim">
       <div class="card-head"><h2>Bank check</h2><button class="btn ghost small" data-act="bank-check">${p.bank.balance != null ? "Update" : "Enter balance"}</button></div>
       ${!bank ? `<p class="muted" style="margin:0">Enter what your account holds after your pay arrives and you've ticked what you paid. Next payday the app compares again, to catch spending you forgot to log.</p>`
       : bank.first ? `<div class="checks"><div class="check-row"><span>In the bank ${p.bank.date ? `<span class="muted">${esc(fmtDate(p.bank.date))}</span>` : ""}</span><b class="money">${peso(p.bank.balance)}</b></div><div class="check-row"><span>Starting point</span><span class="chip good">Saved</span></div></div>
@@ -117,7 +123,7 @@ export function viewPayday() {
       : `<div class="checks"><div class="check-row"><span>Plan expects <span class="muted">last check + logged since</span></span><b class="money">${peso(bank.expected)}</b></div><div class="check-row"><span>In the bank ${p.bank.date ? `<span class="muted">${esc(fmtDate(p.bank.date))}</span>` : ""}</span><b class="money">${peso(p.bank.balance)}</b></div><div class="check-row"><span>Gap</span>${gapChip}</div></div>
       <p class="note">${bank.gap < -1 ? "Spending or a bill you haven't logged yet? Add it so the plan matches." : bank.gap > 1 ? "Income or a refund you haven't logged? Add it, or move the extra to a fund." : "Everything you logged adds up."}</p>`}
     </section>
-    <button class="btn ghost anim" data-act="delete-period" style="justify-self:start">Delete this payday plan</button>
-   </div>
-  </div>`;
+    <button class="btn ghost anim del-plan" data-act="delete-period">Delete this payday plan</button>
+  </div>
+</div>`;
 }

@@ -86,7 +86,8 @@ export const A = {
   restore: async el => { const f = el.files?.[0]; if (!f) return; try { await restoreBackup(f); app.toast("Backup restored"); app.boot(); } catch (e) { app.toast(e.message || "That file couldn't be read."); } el.value = ""; },
   "sign-out-all": el => armed(el, "Select again: sign out every device", async () => { try { await signOutAll(); } catch { app.toast("Couldn't reach the Sheet. Try again when you're online."); } }),
   "forget-device": el => armed(el, S.mode === "sheet" ? "Select again: remove data from this device" : "Select again: erase everything here", () => forgetDevice()),
-  "go-connect": () => app.connect()
+  "go-connect": () => app.connect(),
+  theme: el => { window.paydayTheme?.set(el.dataset.v); app.render(); }
 };
 
 function billSheet(b, forceStatus) {

@@ -2,7 +2,7 @@
 // so financial data never sits in Cache Storage (the app keeps its own cache in localStorage).
 const CACHE = "money-plan-shell-v1";
 const SHELL = ["./", "index.html", "css/app.css", "manifest.webmanifest", "icons/icon.svg", "icons/icon-192.png",
-  "js/main.js", "js/app.js", "js/api.js", "js/store.js", "js/calc.js", "js/format.js", "js/motion.js", "js/charts.js", "js/forms.js", "js/actions.js",
+  "js/main.js", "js/app.js", "js/api.js", "js/store.js", "js/calc.js", "js/format.js", "js/motion.js", "js/charts.js", "js/forms.js", "js/actions.js", "js/tour.js", "js/theme.js",
   "js/views/common.js", "js/views/payday.js", "js/views/month.js", "js/views/funds.js", "js/views/trends.js"];
 const CDN = ["https://cdnjs.cloudflare.com/", "https://fonts.googleapis.com/", "https://fonts.gstatic.com/"];
 

@@ -8,7 +8,8 @@ A twice-a-month (15th / 30th payday) budget web app. Static site on GitHub Pages
 - Work autonomously and note decisions in this file or the README.
 
 ## Design
-- Desktop-first: used mainly in a computer or laptop browser, the phone is secondary. From 900px wide: sidebar navigation (keyboard: ← → month, 1–4 sections), one-row header, multi-column views (Payday goes three columns from 1200px), centered dialogs, bill actions on hover/focus. Below 900px: bottom tab bar, bottom sheets, swipeable bill rows.
+- Desktop-first: used mainly in a computer or laptop browser, the phone is secondary. From 900px wide: sidebar navigation (keyboard: ← → month, 1–4 sections), one-row header, centered dialogs, bill actions on hover/focus. Below 900px: bottom tab bar, bottom sheets, swipeable bill rows.
+- Statement + summary rail (chosen 2026-10-26 to replace the "task board" grid of equal cards): every view is `.st > .st-main + .st-rail`. From 900px `.st-main` is one flat sheet whose sections (`.card.sec` / `.sec`) are split by hairlines, with section totals (`.sec-total`) in one right-hand column; bills show due and category as columns (`.col-when`, `.col-cat`). From 1100px the rail sits on the right and its first panel is sticky (`.st-rail.static` opts out). Below 900px the wrappers are `display: contents`, so sections stay cards; `.ph-first` / `.ph-last` reorder non-interactive items only, and `.ph-only` / `.eq-only` swap phone and desktop wording.
 - Pink design system: rose/blush tokens on `:root` in `app/css/app.css`; green/amber/red only for Comfortable/Watch/Tight. White text sits on `--accent`, never `--pink` (contrast).
 
 ## Layout
@@ -17,6 +18,8 @@ A twice-a-month (15th / 30th payday) budget web app. Static site on GitHub Pages
 - `app/js/api.js`: Apps Script client. The Sheet link must match `https://script.google.com/macros/s/…/exec`.
 - `app/js/views/*.js`: return HTML strings. **Every interpolated value goes through `esc()` or a number formatter.**
 - `app/js/actions.js`: tap handlers and edit sheets (bottom sheets on native `<dialog>`, in `forms.js`).
+- `app/js/tour.js`: first-run tour of the Payday screen (7 steps). Spotlight + card are `popover="manual"`, non-modal so the page stays usable; offered once per device (localStorage `money-plan-tour-v1`), replayed from Trends & setup. Steps target `.hero-band`, `#billsCard`, `#savingsCard`, `#spendCard`, `.top-row`, `.side-nav`/`#tabbar`, `.sync`: keep those when changing views. User guide: `docs/HOW-TO.md`.
+- `app/js/theme.js`: plain (non-module) script in `<head>` so the saved Light / Dark / Match device choice applies before first paint (CSP forbids inline scripts). Sets `data-theme` on `<html>` (the CSS already keys dark tokens off it) and the `theme-color` metas; per device in localStorage `money-plan-theme-v1`, not synced to the Sheet. Picker: Trends & setup › Appearance.
 - `app/js/motion.js`: GSAP 3.13.0 (cdnjs + SRI): `gsap.matchMedia` for reduced motion, Flip, Draggable (sheet handle only), sparkles. Bill swipe uses CSS scroll-snap, not JS gestures.
 - `apps-script/Code.gs`: typed schema, `docsToTables` / `tablesToDocs` (pure, tested with fakes in `tests/sheet.test.js`), auth with hashed device tokens, lockout, formula-injection escaping.
 

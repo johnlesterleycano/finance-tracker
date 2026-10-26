@@ -9,6 +9,8 @@ import { viewPayday } from "./views/payday.js";
 import { viewMonth } from "./views/month.js";
 import { viewFunds } from "./views/funds.js";
 import { viewTrends } from "./views/trends.js";
+import { howTo } from "./views/common.js";
+import { offerTour, replayTour } from "./tour.js";
 
 // GitHub Pages can't send X-Frame-Options, so refuse to run inside someone else's frame (clickjacking)
 if (window.top !== window.self) { document.body.textContent = "This page can't be shown inside another site."; throw new Error("framed"); }
@@ -31,6 +33,14 @@ function render(kind = "update", dir = 1) {
   window.scrollTo(0, kind === "update" ? y : 0);
   placePills(kind !== "update");
   animateView(v, kind, dir);
+  offerTour();
+}
+function goTab(to) {
+  const dir = TABS.indexOf(to) >= TABS.indexOf(ui.tab) ? 1 : -1;
+  ui.tab = to;
+  try { history.replaceState(null, "", "#" + to); } catch {}
+  window.scrollTo({ top: 0 });
+  render("slide", dir);
 }
 function placePills(animate) {
   const seg = $("#halfSeg");
@@ -65,7 +75,7 @@ function showConnect(message = "") {
     <div class="or"><span>or</span></div>
     ${S.mode === "none" ? `<button class="btn ghost" data-act="use-local" style="width:100%">Use on this device only</button>` : ""}
     ${S.mode !== "none" ? `<button class="btn ghost" data-act="connect-back" style="width:100%">Back to my plan</button>` : ""}
-    <p class="note">New here? Follow the <a href="${SETUP_GUIDE}" target="_blank" rel="noopener noreferrer">setup guide</a> to make your Sheet. Your passcode is never stored on this device.</p>
+    <p class="note">New here? Follow the <a href="${SETUP_GUIDE}" target="_blank" rel="noopener noreferrer">setup guide</a> to make your Sheet, then the ${howTo("how-to guide")} to learn the app. Your passcode is never stored on this device.</p>
   </section>`;
   animateView($("#view"), "enter");
   const form = $("#connectForm"), msg = $("#connectMsg"), btn = form.querySelector("button[type=submit]");
@@ -107,8 +117,9 @@ function toast(msg) {
   clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 2800);
 }
 
-Object.assign(app, { render, toast, boot, connect: () => { ui.connecting = true; showConnect(); } });
+Object.assign(app, { render, toast, boot, goTab, connect: () => { ui.connecting = true; showConnect(); } });
 A["use-local"] = () => { ui.connecting = false; useLocal(); boot(); };
+A.tour = replayTour;
 A["connect-back"] = () => { ui.connecting = false; boot(); };
 on("status", setSync);
 on("data", () => render());
@@ -116,15 +127,7 @@ on("toast", toast);
 
 document.addEventListener("click", e => {
   const t = e.target.closest("[data-tab]");
-  if (t) {
-    const to = t.dataset.tab, dir = TABS.indexOf(to) >= TABS.indexOf(ui.tab) ? 1 : -1;
-    if (to === ui.tab) return;
-    ui.tab = to;
-    try { history.replaceState(null, "", "#" + to); } catch {}
-    window.scrollTo({ top: 0 });
-    render("slide", dir);
-    return;
-  }
+  if (t) { if (t.dataset.tab !== ui.tab) goTab(t.dataset.tab); return; }
   if (e.target.closest(".sync")) { if (sync.state === "signed-out") app.connect(); else if (S.mode === "sheet") A["sync-now"](); return; }
   const a = e.target.closest("[data-act]");
   if (a && A[a.dataset.act] && !a.disabled) { e.preventDefault(); app.lastTap = a; A[a.dataset.act](a); }

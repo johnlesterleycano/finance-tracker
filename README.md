@@ -8,6 +8,8 @@ It runs as a static site on GitHub Pages. Your data lives in **your own private 
 
 ## What it does
 
+First time using it? Read the **[how-to guide](docs/HOW-TO.md)**: a walkthrough of every screen and a payday routine.
+
 | Tab | What you see and do |
 | --- | --- |
 | **Payday** | Income, bills and savings for one payday, plus what's left to assign. Tick a bill paid; hover it (or swipe it on a phone) for "part paid" and "edit". Also here: alerts for bills due soon, a spending-money envelope with an expense log, and a bank check that compares your real balance with the plan. |
@@ -31,6 +33,7 @@ It runs as a static site on GitHub Pages. Your data lives in **your own private 
 | `apps-script/Code.gs` | The Google Sheet backend (paste it into the Sheet's Apps Script editor). |
 | `tests/` | Node tests: money rules, Sheet mapping and auth, site security headers, the personal-data scan. |
 | `scripts/scan.sh` | Blocks spreadsheets, exports, Sheet links and passcodes from ever being committed. |
+| `docs/HOW-TO.md` | Walkthrough for first-time users: every screen, what the numbers mean, the payday routine. |
 | `docs/SETUP.md` | Step by step: Sheet, Apps Script, GitHub Pages. |
 | `docs/SECURITY.md` | Threat model and protections. |
 

@@ -44,14 +44,17 @@ export function viewFunds() {
     const st = loanStats(l, S, today), term = +l.term || 0, f = term ? st.paid / term : 0;
     return `<button class="card fund anim loan" data-act="edit-loan" data-id="${esc(l._id)}">${ring(f)}<span class="loan-body"><b>${esc(l.name)}</b><span class="row-meta">${peso0(l.monthly)} a month · ${st.paid}${term ? " of " + term : ""} paid${l.rate ? " · " + esc(String(l.rate)) + "% a year" : ""}</span><span class="row-meta">${st.left == null ? (l.balance ? "Open-ended · see the payoff plan below" : "Add the number of months to see what's left") : st.left === 0 ? "Fully paid" : st.left + " months left · about " + peso0(st.remaining) + " to go · ends " + esc(st.ends)}</span>${l.balance ? `<span class="row-meta">Balance ${peso0(l.balance)}</span>` : ""}</span></button>`;
   }).join("");
-  return `<div class="hero anim" style="margin-bottom:4px"><span class="eyebrow">All savings funds</span><div class="hero-big money" data-count="${total}" data-key="funds-total">${peso0(total)}</div><div class="hero-sub">Opening balance plus every transfer marked as moved, minus withdrawals${S.settings.trackFrom ? " since " + esc(fmtDate(S.settings.trackFrom)) + " " + esc(S.settings.trackFrom.slice(0, 4)) : ""}.</div></div>
-  <div class="fu"><div class="fu-a">
-  ${!hasEmergency && ess ? `<div class="card anim tip"><b>Start an emergency fund?</b><span class="muted">Three months of your essential bills is ${peso0(ess * 3)}. It covers a job loss or a hospital bill without new debt.</span><button class="btn ghost small" data-act="add-fund" data-kind="emergency">${ic.plus} Emergency fund</button></div>` : ""}
-  <div class="section-title"><h2>Savings funds</h2><button class="btn ghost small" data-act="add-fund">${ic.plus} Fund</button></div>
-  <div class="cards">${funds.map(f => fundCard(f, today)).join("") || '<div class="card muted">No funds yet.</div>'}</div>
-  </div><div class="fu-b">
-  <div class="section-title"><h2>Loans & installments</h2><button class="btn ghost small" data-act="add-loan">${ic.plus} Loan</button></div>
-  <div class="cards">${lc || '<div class="card muted anim">Add a loan to count down the months left. Each paid bill with the same name counts as one installment.</div>'}</div>
-  <div style="margin-top:14px">${payoffCard(today)}</div>
-  </div></div>`;
+  return `<div class="st">
+  <div class="st-main">
+  ${!hasEmergency && ess ? `<section class="card sec anim tip"><b>Start an emergency fund?</b><span class="muted">Three months of your essential bills is ${peso0(ess * 3)}. It covers a job loss or a hospital bill without new debt.</span><button class="btn ghost small" data-act="add-fund" data-kind="emergency">${ic.plus} Emergency fund</button></section>` : ""}
+  <section class="sec"><div class="section-title"><h2>Savings funds</h2><button class="btn ghost small" data-act="add-fund">${ic.plus} Fund</button></div>
+  <div class="cards">${funds.map(f => fundCard(f, today)).join("") || '<div class="card muted">No funds yet.</div>'}</div></section>
+  <section class="sec"><div class="section-title"><h2>Loans & installments</h2><button class="btn ghost small" data-act="add-loan">${ic.plus} Loan</button></div>
+  <div class="cards">${lc || '<div class="card muted">Add a loan to count down the months left. Each paid bill with the same name counts as one installment.</div>'}</div></section>
+  </div>
+  <div class="st-rail">
+  <div class="hero anim ph-first"><span class="eyebrow">All savings funds</span><div class="hero-big money" data-count="${total}" data-key="funds-total">${peso0(total)}</div><div class="hero-sub">Opening balance plus every transfer marked as moved, minus withdrawals${S.settings.trackFrom ? " since " + esc(fmtDate(S.settings.trackFrom)) + " " + esc(S.settings.trackFrom.slice(0, 4)) : ""}.</div></div>
+  ${payoffCard(today)}
+  </div>
+</div>`;
 }

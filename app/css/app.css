@@ -26,6 +26,8 @@
   --accent:#c2245f; --good:#4fd1a1; --good-bg:#123326; --warn:#f2b54a; --warn-bg:#3a2a0c; --bad:#ff7a8e; --bad-bg:#3d1219;
   --c1:#ff6b9e; --c2:#b88cf2; --c3:#f5b06b; --c4:#6cc0dc; --c5:#a8939c; --c6:#4fd1a1; --c7:#6b2a45;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); --hero-shadow:0 14px 30px -16px rgba(0,0,0,.6); --btn-shadow:0 6px 14px -10px rgba(0,0,0,.7); --bar-shadow:0 10px 30px -8px rgba(0,0,0,.6); --sheet-shadow:0 -10px 40px rgba(0,0,0,.5); color-scheme:dark}
+/* a forced light theme on a dark device: keep form controls and scrollbars light too */
+:root[data-theme="light"]{color-scheme:light}
 *{box-sizing:border-box}
 html,body{min-height:100%}
 body{margin:0}
@@ -105,7 +107,7 @@ main:focus{outline:none} /* focused only by script (skip link, closing a sheet) 
 .check.part{border-color:var(--pink);background:conic-gradient(var(--pink) 0 50%,transparent 50% 100%)}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
 .add{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:11px;border-radius:var(--r-md);border:1.5px dashed var(--pink-soft);color:var(--pink-deep);font-weight:600}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:14px;font-weight:700;background:linear-gradient(135deg,var(--hero-a),var(--hero-b));color:var(--on-hero);box-shadow:var(--btn-shadow)}
+.btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:14px;font-weight:700;background:linear-gradient(135deg,var(--hero-a),var(--hero-b));color:var(--on-hero);box-shadow:var(--btn-shadow)}
 .btn.ghost{background:var(--blush);color:var(--pink-deep);box-shadow:none}
 .btn.danger{background:var(--bad-bg);color:var(--bad);box-shadow:none}
 .btn.small{padding:8px 12px;font-size:13px;border-radius:11px}
@@ -180,6 +182,18 @@ main:focus{outline:none} /* focused only by script (skip link, closing a sheet) 
 .toggle{display:flex;align-items:center;gap:10px;font-weight:600}
 .toggle input{width:20px;height:20px;accent-color:var(--pink)}
 .toast{position:fixed;z-index:50;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:14px;font-weight:600;font-size:14px;box-shadow:var(--shadow)}
+/* first-run tour: both are manual popovers (top layer); position:fixed + z-index covers browsers without popover */
+.tour-spot,.tour-card{position:fixed;inset:auto;margin:0;border:0;z-index:70;overflow:visible}
+.tour-spot{padding:0;background:transparent;pointer-events:none;box-shadow:0 0 0 3px var(--pink),0 0 0 200vmax rgba(40,8,22,.42)}
+@media (prefers-reduced-motion:no-preference){.tour-spot.moving{transition:left .45s,top .45s,width .45s,height .45s,border-radius .45s;transition-timing-function:cubic-bezier(.16,1,.3,1)}}
+.tour-card{width:min(360px,calc(100vw - 32px));padding:18px 18px 16px;border-radius:var(--r-lg);background:var(--surface);color:var(--ink);box-shadow:var(--bar-shadow)}
+.tour-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px}
+.tour-head h2{font-size:19px;font-weight:800;line-height:1.2}
+.tour-skip{flex:none;font-size:13px;font-weight:600;color:var(--muted);padding:6px 8px;margin:-4px -8px 0 0;border-radius:8px}
+.tour-skip:hover{color:var(--ink);background:var(--surface-2)}
+.tour-card p{margin:0;color:var(--muted);max-width:60ch}
+.tour-foot{display:flex;align-items:center;gap:8px;margin-top:16px}
+.tour-count{margin-right:auto;font-size:13px;font-weight:600;color:var(--muted)}
 .skel{height:140px;border-radius:26px;background:linear-gradient(90deg,var(--blush),var(--surface-2),var(--blush));background-size:200% 100%;animation:sk 1.4s infinite linear}
 @keyframes sk{to{background-position:-200% 0}}
 @media (prefers-reduced-motion: reduce){.skel{animation:none}}
@@ -242,7 +256,8 @@ body[data-screen="connect"] .tabs,body[data-screen="connect"] .month-nav,body[da
 .tl-when{font-size:12.5px;color:var(--muted);text-align:right}
 .tl-track{grid-column:1/-1;height:10px;border-radius:99px;background:var(--blush);overflow:hidden}
 .tl-track .hbar{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--hero-a),var(--pink))}
-.card-head .opts{flex-wrap:nowrap}
+.card-head .opts,.opts.one-row{flex-wrap:nowrap}
+.opts.one-row button{flex:1 1 auto;padding:8px 10px;white-space:nowrap}
 .card-head .opts button{padding:6px 10px;font-size:12.5px}
 .paidbar{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;margin:10px 0}
 .paidbar-track{display:flex;height:16px;border-radius:99px;overflow:hidden;background:var(--blush)}
@@ -269,8 +284,6 @@ body[data-screen="connect"] .tabs,body[data-screen="connect"] .month-nav,body[da
 .side{display:none}
 .chart-title{font-family:var(--f-body);font-size:13px;font-weight:700;color:var(--muted);margin:0 0 6px}
 .trend-grid{display:grid;gap:18px}
-.pd,.mo,.fu,.setup,.grid.three{display:grid;gap:14px}
-.fu-a,.fu-b{min-width:0}
 kbd{font-family:var(--f-body);font-size:11px;font-weight:700;padding:1px 6px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line)}
 @media (hover:hover){
   .row-main:hover .row-name,.row-main:focus-visible .row-name{color:var(--pink-deep)}
@@ -295,13 +308,12 @@ kbd{font-family:var(--f-body);font-size:11px;font-weight:700;padding:1px 6px;bor
   .side-nav button[aria-current="page"]{background:var(--blush);color:var(--pink-deep)}
   .side-foot{margin-top:auto;display:grid;gap:10px;padding:0 8px}
   .kbd-hint{margin:0;font-size:12px;color:var(--muted);line-height:1.9;display:grid}
-  .fu-b .cards{grid-template-columns:minmax(0,1fr)}
   .tabs,.top .brand,.top .sync{display:none}
   body[data-screen="connect"] .side-nav,body[data-screen="connect"] .side-foot{display:none}
 
   .wrap{max-width:1360px;width:100%;padding:0 32px 48px}
   .top{margin:0 -32px;padding:20px 32px 16px}
-  .top-row{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"left seg nav";align-items:center;gap:16px}
+  .top-row{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"left seg nav";align-items:center;gap:16px;min-height:44px} /* same height with or without the payday switch */
   .month-title{font-size:30px;margin-top:0}
   .seg{margin-top:0}
   main{gap:18px;margin-top:4px}
@@ -309,26 +321,7 @@ kbd{font-family:var(--f-body);font-size:11px;font-weight:700;padding:1px 6px;bor
   .card{padding:20px 22px}
   .toast{bottom:28px;left:auto;right:32px;transform:none}
 
-  /* summary band: the number that matters on the left, the four totals on the right */
-  .hero-band{display:grid;gap:18px;align-items:center;padding:24px 28px}
-  .hero-band .hero-stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:0}
-  .hero-band .hero-big{font-size:52px}
-  .hero-band .hero-top{justify-content:flex-start;gap:12px}
-  .hero-stats div{padding:12px 14px}
-  .hero-stats b{font-size:18px}
-
-  /* payday: bills get the widest column, the rest stacks beside it */
-  .pd{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);grid-template-areas:"a b" "a c";align-items:start;gap:18px}
-  .pd-a{grid-area:a}.pd-b{grid-area:b}.pd-c{grid-area:c}
-  .due-card .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));column-gap:28px}
-  .due-card .row{border-top:0;padding:8px 0}
-
-  .mo{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);grid-template-areas:"a b" "a c";align-items:start;gap:18px}
-  .mo-a{grid-area:a}.mo-b{grid-area:b}.mo-c{grid-area:c}
-  .grid.three{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
   .trend-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;align-items:start} /* equal widths keep both charts' text the same size */
-  .setup{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-areas:"a b" "a c";align-items:start;gap:18px}
-  .setup-a{grid-area:a}.setup-b{grid-area:b}.setup-c{grid-area:c}
   .start-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);align-items:start}
   .empty{max-width:640px;width:100%;margin-inline:auto}
 
@@ -344,10 +337,77 @@ kbd{font-family:var(--f-body);font-size:11px;font-weight:700;padding:1px 6px;bor
   .sheet{inset:0;margin:auto;width:min(560px,calc(100vw - 48px));max-height:min(86vh,820px);height:fit-content;border-radius:22px;padding:22px 26px 24px}
   .grab{display:none}
 }
-@media (min-width:1200px){
-  .hero-band{grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:24px}
-  .pd{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);grid-template-areas:"a b c"}
-  .grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .fu{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:start;gap:28px}
-  .setup{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr);grid-template-areas:"a b c"}
+
+/* ---------- statement + summary rail ----------
+   Every view is .st > .st-main (the statement) + .st-rail (the summary). Phones: the wrappers dissolve and the
+   sections stay cards in one column. Computers: the statement is one flat sheet with hairline sections; from 1100px
+   the rail sits on the right and its first panel stays in view while the statement scrolls. */
+.st{display:grid;gap:14px;min-width:0}
+.st-main,.st-rail{display:contents}
+.ph-first{order:-1}.ph-last{order:1}
+.sec-total,.col-when,.col-cat,.eq-only{display:none}
+.pair{display:grid;gap:22px}
+.hero .chip.good{color:#0f7a57}.hero .chip.warn{color:#9a6000}.hero .chip.bad{color:#b8283f} /* the chip is near-white in both themes */
+
+@media (min-width:900px){
+  .st{gap:22px}
+  .st-main,.st-rail{display:grid;min-width:0;align-content:start}
+  .ph-first,.ph-last{order:0}
+  .st-rail{gap:16px}
+  .st-main{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:4px 32px 16px}
+  .st-main>.card,.st-main>.sec{background:none;box-shadow:none;border-radius:0;padding:22px 0 20px;border-top:1px solid var(--line);margin:0}
+  .st-main>:first-child{border-top:0}
+  .st-main .card-head,.st-main .section-title{justify-content:flex-start;align-items:center;gap:10px;margin:0 0 10px}
+  .st-main .card-head h2,.st-main .section-title h2{font-size:19px;font-weight:800}
+  .st-main .section-title .btn,.st-main .card-head>.btn:last-child{margin-left:auto}
+  .sec-total{display:block;margin-left:auto;font-family:var(--f-display);font-size:19px;font-weight:800}
+  .st-main .totals,.ph-only{display:none}
+  .st-main .add{display:inline-flex;width:auto;justify-content:flex-start;margin:6px 0 0 -6px;padding:6px 10px 6px 6px;border:0;border-radius:10px;font-size:14px}
+  .st-main .paid-line{max-width:420px}
+  .st-main .progress{max-width:420px}
+  .st-main .env-top .fund-bal{font-size:22px}
+  .st-main .tip{display:grid;gap:6px}
+  .st-main>.del-plan{justify-self:end;margin-top:8px;padding:8px 6px;border-top:0;background:none;color:var(--muted);font-size:13px;font-weight:600}
+  .st-main>.del-plan:hover{color:var(--bad);background:none}
+
+  /* bills read as a table: check | name | due or paid | category | amount */
+  .st-main .swipe>.row{display:grid;grid-template-columns:30px minmax(0,1fr) 128px minmax(0,170px) 104px;gap:14px}
+  .col-when,.col-cat{display:flex;align-items:center;gap:7px;min-width:0;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden}
+
+  /* funds and loans become rows of the statement: name and details left, balance right */
+  .st-main .cards{display:block}
+  .st-main .card.fund{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:20px;row-gap:4px;align-items:center;background:none;box-shadow:none;border-radius:0;padding:14px 0;border-top:1px solid var(--line)}
+  .st-main .cards>:first-child{border-top:0}
+  .st-main .card.fund>*{grid-column:1}
+  .st-main .card.fund>.fund-bal{grid-column:2;grid-row:1/span 4;font-size:20px;text-align:right}
+  .st-main .fund-top{justify-content:flex-start;align-items:center}
+  .st-main .card.loan{display:flex}
+  .st-main .card.muted{background:none;box-shadow:none;padding:6px 0}
+  .st-main .card.fund:hover .fund-top b,.st-main .card.loan:hover .loan-body>b{color:var(--pink-deep)}
+
+  .pair{grid-template-columns:repeat(2,minmax(0,1fr));gap:36px;align-items:start}
+
+  /* rail: the payday summary lists the whole sum, one line per term */
+  .st-rail .hero-big{font-size:46px}
+  .st-rail .hero-stats{grid-template-columns:1fr;gap:7px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.24)}
+  .st-rail .hero-stats div{display:flex;flex-direction:row-reverse;justify-content:space-between;align-items:baseline;gap:12px;background:none;border-radius:0;padding:0}
+  .st-rail .hero-stats b{display:inline;font-size:14.5px}
+  .st-rail .hero-stats span{font-size:14px;opacity:.92}
+  .st-rail .hero-stats span::before{content:attr(data-op);display:inline-block;width:18px;opacity:.75}
+  .st-rail .eq-only{display:flex}
+  .st-rail .eq-total{margin-top:3px;padding-top:9px!important;border-top:1px solid rgba(255,255,255,.4)}
+  .st-rail .eq-total b,.st-rail .eq-total span{font-weight:800;opacity:1}
+  .st-rail .card{padding:18px 20px}
+  .st-rail .card h2{font-size:16px;font-weight:800}
+}
+@media (min-width:900px) and (max-width:1099px){
+  .st-rail{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:start}
+  .st-main .swipe>.row{grid-template-columns:30px minmax(0,1fr) 120px 96px}
+  .col-cat{display:none}
+}
+@media (min-width:1100px){
+  .st{grid-template-columns:minmax(0,1fr) 340px;gap:28px;align-items:start}
+  .st-main{grid-column:1;grid-row:1}
+  .st-rail{grid-column:2;grid-row:1;align-self:stretch}
+  .st-rail:not(.static)>:first-child{position:sticky;top:84px;z-index:1} /* = where the rail starts below the header, so it never shifts at rest */
 }
