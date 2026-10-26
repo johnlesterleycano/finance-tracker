@@ -1,0 +1,21 @@
+# Personal data: never commit (also enforced by scripts/scan.sh)
+spreadsheet/
+*.xlsx
+*.xls
+*.xlsm
+*.ods
+*.csv
+data/
+money-plan-backup*.json
+*.local.md
+*.local.txt
+.env*
+
+# Tooling
+.DS_Store
+node_modules/
+.unlazy/
+.unlazy-hook-state.json
+.claude/settings.local.json
+.playwright-cli/
+GATES.md
