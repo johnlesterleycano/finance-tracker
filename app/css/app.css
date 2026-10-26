@@ -253,3 +253,11 @@ body[data-screen="connect"] .tabs,body[data-screen="connect"] .month-nav,body[da
 
 /* celebration sparks */
 .spark{position:fixed;z-index:60;width:8px;height:8px;border-radius:50%;pointer-events:none}
+
+/* phones: hide scrollbars (scrolling still works); desktop keeps them for mouse users */
+@media (pointer: coarse) {
+  html, .scroll-x, .sheet { scrollbar-width: none; }
+  @supports not (scrollbar-width: none) {
+    html::-webkit-scrollbar, .scroll-x::-webkit-scrollbar, .sheet::-webkit-scrollbar { display: none; }
+  }
+}
