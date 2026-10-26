@@ -2,6 +2,7 @@
 import { esc } from "./format.js";
 import { S } from "./store.js";
 import { G, draggableSheet } from "./motion.js";
+import { app } from "./app.js";
 
 let dlg = null, opener = null;
 const closeIcon = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
@@ -15,7 +16,7 @@ function openerKey(el) {
 
 export function openSheet(title, body, onSave, opts = {}) {
   closeNow();
-  opener = openerKey(document.activeElement?.closest?.("[data-act]"));
+  opener = openerKey(document.activeElement?.closest?.("[data-act]") || app.lastTap);
   dlg = document.createElement("dialog");
   dlg.className = "sheet";
   dlg.setAttribute("closedby", "any");

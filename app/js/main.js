@@ -128,7 +128,7 @@ document.addEventListener("click", e => {
   }
   if (e.target.closest("#sync")) { if (sync.state === "signed-out") app.connect(); else if (S.mode === "sheet") A["sync-now"](); return; }
   const a = e.target.closest("[data-act]");
-  if (a && A[a.dataset.act] && !a.disabled) { e.preventDefault(); A[a.dataset.act](a); }
+  if (a && A[a.dataset.act] && !a.disabled) { e.preventDefault(); app.lastTap = a; A[a.dataset.act](a); }
 });
 document.addEventListener("change", e => { const a = e.target.closest("[data-act-change]"); if (a && A[a.dataset.actChange]) A[a.dataset.actChange](a); });
 // keyboard focus on a swiped-open row's main content slides the row closed again
