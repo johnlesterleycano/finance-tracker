@@ -17,7 +17,7 @@ About 15 minutes. You need a Google account and a GitHub account.
    4. Click **Save**.
    - Anyone with the passcode and the link below can see your budget, so pick something long that you don't use anywhere else.
 5. Run the setup:
-   1. In the editor, choose the function `setup` in the toolbar and click **Run**.
+   1. In the editor, choose the function `setup` in the toolbar (the menu next to **Debug**) and click **Run**. It is the only setup step to run; nothing else needs to be run by hand.
    2. Approve the permissions. Google warns that the app isn't verified; it's your own script, so choose **Advanced › Go to project**.
    3. The sheet now has tabs: Settings, IncomeSources, RecurringBills, Paydays, PaydayBills…
 6. Deploy the web app:

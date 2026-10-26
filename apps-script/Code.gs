@@ -102,7 +102,7 @@ function rowsFor_(spec, docs, strict, parentId) {
 }
 
 // data {settings, recurring, funds, loans, periods} -> {TabName: [header, ...rows]}; only the collections listed in `only`.
-function docsToTables(data, strict, only) {
+function docsToTables_(data, strict, only) {
   var out = {}, cols = only || COLLECTIONS.concat(['settings']);
   cols.forEach(function (col) {
     if (col === 'settings') {
@@ -141,7 +141,7 @@ function readRows_(table, cols, fmtDate, extra) {
 }
 
 // {TabName: [header, ...rows]} -> data. Lenient: columns can be reordered and bad cells become defaults.
-function tablesToDocs(tables, fmtDate) {
+function tablesToDocs_(tables, fmtDate) {
   fmtDate = fmtDate || function (d, kind) { var iso = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); return kind === 'month' ? iso.slice(0, 7) : iso; };
   var data = { settings: {} };
   var st = tables[SETTINGS.tab] || [];
@@ -182,7 +182,7 @@ function sheetDate_(d, kind) { return Utilities.formatDate(d, ss_().getSpreadshe
 function readAll_() {
   var tables = {};
   ss_().getSheets().forEach(function (sh) { tables[sh.getName()] = sh.getDataRange().getValues(); });
-  return tablesToDocs(tables, sheetDate_);
+  return tablesToDocs_(tables, sheetDate_);
 }
 // shortcut: each save rewrites the collection's tabs in full; fine for a few thousand rows, switch to per-row updates if saves get slow
 function writeTab_(name, rows) {
@@ -197,7 +197,7 @@ function writeTab_(name, rows) {
   sh.setFrozenRows(1);
 }
 function writeCollection_(data, col) {
-  var t = docsToTables(data, false, [col]);
+  var t = docsToTables_(data, false, [col]);
   tabsFor_(col).forEach(function (tab) { writeTab_(tab, t[tab]); });
 }
 
@@ -240,7 +240,7 @@ function handle_(b) {
   if (b.action === 'put') {
     if (!b.doc || typeof b.doc !== 'object' || Array.isArray(b.doc)) throw invalid_('doc must be an object');
     var probe = { settings: {} }; if (col === 'settings') probe.settings = b.doc; else { probe[col] = {}; probe[col][id] = b.doc; }
-    docsToTables(probe, true, [col]); // strict check of the incoming doc only
+    docsToTables_(probe, true, [col]); // strict check of the incoming doc only
     if (col === 'settings') data.settings = b.doc; else data[col][id] = b.doc;
   } else {
     if (col === 'settings') throw invalid_('settings cannot be deleted');
@@ -286,4 +286,4 @@ function setup() {
 function signOutAllDevices() { props_().deleteProperty('TOKENS'); console.log('Every device is signed out.'); }
 
 // node test hook (Apps Script ignores this)
-if (typeof module !== 'undefined') module.exports = { docsToTables: docsToTables, tablesToDocs: tablesToDocs, guard_: guard_, unguard_: unguard_ };
+if (typeof module !== 'undefined') module.exports = { docsToTables_: docsToTables_, tablesToDocs_: tablesToDocs_, guard_: guard_, unguard_: unguard_ };

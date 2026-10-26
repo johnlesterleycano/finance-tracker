@@ -21,7 +21,7 @@ A twice-a-month (15th / 30th payday) budget web app. Static site on GitHub Pages
 - `app/js/tour.js`: first-run tour of the Payday screen (7 steps). Spotlight + card are `popover="manual"`, non-modal so the page stays usable; offered once per device (localStorage `money-plan-tour-v1`), replayed from Trends & setup. Steps target `.hero-band`, `#billsCard`, `#savingsCard`, `#spendCard`, `.top-row`, `.side-nav`/`#tabbar`, `.sync`: keep those when changing views. User guide: `docs/HOW-TO.md`.
 - `app/js/theme.js`: plain (non-module) script in `<head>` so the saved Light / Dark / Match device choice applies before first paint (CSP forbids inline scripts). Sets `data-theme` on `<html>` (the CSS already keys dark tokens off it) and the `theme-color` metas; per device in localStorage `money-plan-theme-v1`, not synced to the Sheet. Picker: Trends & setup › Appearance.
 - `app/js/motion.js`: GSAP 3.13.0 (cdnjs + SRI): `gsap.matchMedia` for reduced motion, Flip, Draggable (sheet handle only), sparkles. Bill swipe uses CSS scroll-snap, not JS gestures.
-- `apps-script/Code.gs`: typed schema, `docsToTables` / `tablesToDocs` (pure, tested with fakes in `tests/sheet.test.js`), auth with hashed device tokens, lockout, formula-injection escaping.
+- `apps-script/Code.gs`: typed schema, `docsToTables_` / `tablesToDocs_` (pure, tested with fakes in `tests/sheet.test.js`), auth with hashed device tokens, lockout, formula-injection escaping.
 
 ## Data model (`normalizeData` in calc.js is the source of truth)
 - `settings`: incomes [{name, a15, a30}], categories, comfortable 0.5, tight 0.7, alert 0.05, carryOver, carryStart, trackFrom, envelope {a15, a30}, extras [{id, name, month, payday, amount}].
