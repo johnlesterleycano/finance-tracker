@@ -1,7 +1,7 @@
 // Light / dark choice for this device. A plain (non-module) script in <head>, so a saved choice applies before the
 // first paint instead of flashing the other theme. "system" follows the device setting.
 (() => {
-  const KEY = "money-plan-theme-v1", BAR = { light: "#e23d78", dark: "#170a10" };
+  const KEY = "money-plan-theme-v1", BAR = { light: "#f4c2c2", dark: "#211517" };
   const apply = t => {
     const root = document.documentElement;
     if (t === "light" || t === "dark") root.dataset.theme = t; else delete root.dataset.theme;
